@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <h1>mongo database</h1>
+    <form action="/addProduct" method="post">
+        <input type="text" placeholder="name" name="name">
+        <input type="text" placeholder="price" name="price">
+
+        <input type="text" placeholder="quantity" name="quantity">
+
+        <button type="submit">submit</button>
+
+
+
+    </form>
+    <div id="updateArea">
+
+    </div>
+
+    <div id="products">
+
+    </div>
+
+    <script>
+        function loadFunction() {
+            fetch('/products')
+                .then(res => res.json())
+                .then(products => {
+                    console.log(products)
+
+                    const container = document.getElementById('products');
+                    products.forEach(pd => {
+                        const p = document.createElement('p');
+                        p.innerHTML = `name: ${pd.name} price: ${pd.price} Quantity: ${pd.quantity}
+                        <button onclick="loadProduct('${pd._id}')" >update </button>
+                <button onclick="deleteProduct('${pd._id}')" >delete </button>`;
+                        container.appendChild(p);
+                    });
+                })
+        }
+        loadFunction();
+
+        function loadProduct(id) {
+            fetch(`/product/${id}`)
+                .then(res => res.json())
+                .then(product => {
+                    console.log(product);
+
+                    const updateContainer = document.getElementById('updateArea');
+                    const p = document.createElement('p');
+                    p.innerHTML = `
+                <input type="text" id="price2" placeholder="${product.price}" name="update_price">
+                <input type="text" id="qty" placeholder="${product.quantity}" name="update_qty">
+                <button onclick="updateProduct('${product._id}')" > submit</button>`;
+                    updateContainer.appendChild(p);
+
+                })
+
+        }
+        function updateProduct(id){
+
+            const price=document.getElementById('price2').value;
+            const quantity=document.getElementById('qty').value;
+            // console.log({id,new_price,new_qty});
+
+            fetch(`/update/${id}`,{
+                method: 'PATCH',
+                headers: {
+                    'Content-type': 'application/json'
+                },
+                body: JSON.stringify({id,price,quantity})
+            })
+            // .then(res=>res.json())
+            .then(data=>{
+                location.reload();
+            })
+        }
+
+        function deleteProduct(id) {
+
+            fetch(`/delete/${id}`, {
+                method: "DELETE",
+                headers: {
+                    'Content-type': 'application/json'
+                }
+            })
+            .then(data=>{
+                location.reload();
+            })
+        }
+    </script>
+
+</body>
+
+</html>
